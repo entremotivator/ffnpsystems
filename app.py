@@ -47,32 +47,76 @@ def main():
     donors, volunteers, events, expenses = load_sample_data()
 
     if page == "Dashboard":
-        st.header("Dashboard")
-        st.write("Overview of key metrics such as donations, volunteer hours, and upcoming events.")
-        
-        # Example visualizations
-        st.subheader("Donation Overview")
-        donation_data = donors.groupby('Date')['Amount Donated'].sum()
-        st.line_chart(donation_data)
-        
-        st.subheader("Volunteer Hours")
-        volunteer_data = volunteers.groupby('Role')['Hours Volunteered'].sum()
-        st.bar_chart(volunteer_data)
-        
-        st.subheader("Upcoming Events")
-        st.write(events)
-        
-        # Additional features
-        st.subheader("Recent Activities")
-        recent_activities = pd.concat([donors, volunteers], keys=['Donors', 'Volunteers'])
-        st.write(recent_activities)
-        
-        # Total donations and volunteer hours
-        st.subheader("Total Donations and Volunteer Hours")
-        total_donations = donors['Amount Donated'].sum()
-        total_volunteer_hours = volunteers['Hours Volunteered'].sum()
-        st.write(f"Total Donations: ${total_donations}")
-        st.write(f"Total Volunteer Hours: {total_volunteer_hours}")
+    st.header("Dashboard")
+    st.write("Welcome to the Dashboard! Here, you can explore an overview of key metrics that highlight the impact of our organization. Track donations, volunteer efforts, and stay informed about upcoming events.")
+
+    # Donation Overview
+    st.subheader("Donation Overview")
+    st.write("This chart provides an overview of the donations received over time, helping us understand donation patterns and trends.")
+    donation_data = donors.groupby('Date')['Amount Donated'].sum()
+    st.line_chart(donation_data)
+
+    # Insightful stats
+    st.write(f"As of today, we have received a total of **${donation_data.sum():,.2f}** in donations.")
+
+    # Volunteer Hours
+    st.subheader("Volunteer Hours Distribution")
+    st.write("Here, we present a breakdown of the total hours volunteered, categorized by the roles our volunteers have undertaken.")
+    volunteer_data = volunteers.groupby('Role')['Hours Volunteered'].sum()
+    st.bar_chart(volunteer_data)
+    
+    # Highlight key contributions
+    st.write("Our volunteers have collectively contributed **{volunteer_data.sum()}** hours of service. The chart above showcases the distribution of these hours across various roles.")
+
+    # Upcoming Events
+    st.subheader("Upcoming Events")
+    st.write("Stay informed about our upcoming events. Your participation can make a difference!")
+    st.table(events)
+
+    # Recent Activities
+    st.subheader("Recent Activities")
+    st.write("A glance at the most recent activities, including donations and volunteer contributions. These activities reflect the ongoing support from our community.")
+    recent_activities = pd.concat([donors, volunteers], keys=['Donors', 'Volunteers'])
+    st.write(recent_activities.sort_values(by='Date', ascending=False).head(10))
+
+    # Total Donations and Volunteer Hours
+    st.subheader("Impact Summary")
+    st.write("The figures below summarize the total impact of our collective efforts.")
+    total_donations = donors['Amount Donated'].sum()
+    total_volunteer_hours = volunteers['Hours Volunteered'].sum()
+    st.metric(label="Total Donations", value=f"${total_donations:,.2f}")
+    st.metric(label="Total Volunteer Hours", value=f"{total_volunteer_hours} hours")
+
+    # Additional Features and Insights
+    st.subheader("Donation Trends by Donor Type")
+    st.write("Explore how donations vary across different types of donors.")
+    donation_trends = donors.groupby(['Donor Type', 'Date'])['Amount Donated'].sum().unstack().fillna(0)
+    st.area_chart(donation_trends)
+
+    st.subheader("Volunteer Engagement Over Time")
+    st.write("Analyze the engagement of volunteers over time, helping us identify peak periods of activity.")
+    volunteer_engagement = volunteers.groupby('Date')['Hours Volunteered'].sum()
+    st.line_chart(volunteer_engagement)
+
+    st.subheader("Donor and Volunteer Breakdown")
+    st.write("The following charts provide a detailed breakdown of donors and volunteers by various categories.")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("**Donors by Type**")
+        donor_type_data = donors['Donor Type'].value_counts()
+        st.bar_chart(donor_type_data)
+    
+    with col2:
+        st.write("**Volunteers by Role**")
+        volunteer_role_data = volunteers['Role'].value_counts()
+        st.bar_chart(volunteer_role_data)
+    
+    # Call to action
+    st.subheader("Get Involved")
+    st.write("Your continued support is vital. Whether through donations or volunteer work, there are many ways to contribute.")
+    st.button("Donate Now")
+    st.button("Sign Up as a Volunteer")
 
     elif page == "Donor Management":
         st.header("Donor Management")
